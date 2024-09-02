@@ -1,0 +1,64 @@
+﻿@{
+    ViewData["Title"] = "TC Kimlik Numarası Doğrulama";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form method="post" enctype="multipart/form-data" asp-controller="Person" asp-action="VerifyFromExcel">
+    <div class="form-group">
+        <label for="file">Excel Dosyasını Seçin veya Sürükleyin:</label>
+        <input type="file" class="form-control" id="file" name="file" />
+    </div>
+    <button type="submit" class="btn btn-primary">Doğrula</button>
+</form>
+
+<h3>Sonuçlar:</h3>
+<div id="results">
+    @* Sonuçlar burada görüntülenecek *@
+</div>
+
+@section Scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('form').on('submit', function (e) {
+                var fileInput = $('#file');
+                if (!fileInput[0].files.length) {
+                    e.preventDefault(); // Form gönderimini engelle
+                    alert('Lütfen bir Excel dosyası seçin.');
+                    return;
+                }
+
+                var formData = new FormData($(this)[0]);
+
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: $(this).attr('method'),
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        var data = JSON.parse(response); // Sunucudan dönen veriyi JSON formatında çözümle
+
+                        var results = $('#results');
+                        results.empty();
+
+                        var resultList = $('<ul></ul>');
+                        data.forEach(function (item) {
+                            var listItem = $('<li></li>').text(
+                                `TC Kimlik No: ${item.PersonId || 'Belirtilmemiş'}, İsim: ${item.Name || 'Belirtilmemiş'}, Soyisim: ${item.Surname || 'Belirtilmemiş'}, Doğum Yılı: ${item.YearOfBirth || 'Belirtilmemiş'}, Doğrulandı: ${item.IsVerified ? 'Evet' : 'Hayır'}`
+                            );
+                            resultList.append(listItem);
+                        });
+
+                        results.append(resultList);
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Bir hata oluştu: ' + error);
+                    }
+                });
+            });
+        });
+
+    </script>
+}
