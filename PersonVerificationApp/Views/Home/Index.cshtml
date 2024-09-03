@@ -14,7 +14,7 @@
 
 <h3>Sonuçlar:</h3>
 <div id="results">
-    @* Sonuçlar burada görüntülenecek *@
+    <ul></ul> <!-- Sonuçlar burada listelenecek -->
 </div>
 
 @section Scripts {
@@ -22,9 +22,10 @@
     <script>
         $(document).ready(function () {
             $('form').on('submit', function (e) {
+                e.preventDefault(); // Formun varsayılan gönderimini engelle
+
                 var fileInput = $('#file');
                 if (!fileInput[0].files.length) {
-                    e.preventDefault(); // Form gönderimini engelle
                     alert('Lütfen bir Excel dosyası seçin.');
                     return;
                 }
@@ -38,20 +39,17 @@
                     processData: false,
                     contentType: false,
                     success: function (response) {
-                        var data = JSON.parse(response); // Sunucudan dönen veriyi JSON formatında çözümle
+                        var data = JSON.parse(response);
 
-                        var results = $('#results');
+                        var results = $('#results ul');
                         results.empty();
 
-                        var resultList = $('<ul></ul>');
                         data.forEach(function (item) {
                             var listItem = $('<li></li>').text(
                                 `TC Kimlik No: ${item.PersonId || 'Belirtilmemiş'}, İsim: ${item.Name || 'Belirtilmemiş'}, Soyisim: ${item.Surname || 'Belirtilmemiş'}, Doğum Yılı: ${item.YearOfBirth || 'Belirtilmemiş'}, Doğrulandı: ${item.IsVerified ? 'Evet' : 'Hayır'}`
                             );
-                            resultList.append(listItem);
+                            results.append(listItem);
                         });
-
-                        results.append(resultList);
                     },
                     error: function (xhr, status, error) {
                         alert('Bir hata oluştu: ' + error);
@@ -59,6 +57,5 @@
                 });
             });
         });
-
     </script>
 }
