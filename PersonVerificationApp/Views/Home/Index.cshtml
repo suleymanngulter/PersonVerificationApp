@@ -14,7 +14,7 @@
 
 <h3>Sonuçlar:</h3>
 <div id="results">
-    <ul></ul> <!-- Sonuçlar burada listelenecek -->
+    @* Sonuçlar burada görüntülenecek *@
 </div>
 
 @section Scripts {
@@ -22,16 +22,13 @@
     <script>
         $(document).ready(function () {
             $('form').on('submit', function (e) {
-                e.preventDefault(); // Formun varsayılan gönderimini engelle
-
                 var fileInput = $('#file');
                 if (!fileInput[0].files.length) {
+                    e.preventDefault(); // Form gönderimini engelle
                     alert('Lütfen bir Excel dosyası seçin.');
                     return;
                 }
-
                 var formData = new FormData($(this)[0]);
-
                 $.ajax({
                     url: $(this).attr('action'),
                     type: $(this).attr('method'),
@@ -39,17 +36,17 @@
                     processData: false,
                     contentType: false,
                     success: function (response) {
-                        var data = JSON.parse(response);
-
-                        var results = $('#results ul');
+                        var data = JSON.parse(response); // Sunucudan dönen veriyi JSON formatında çözümle
+                        var results = $('#results');
                         results.empty();
-
+                        var resultList = $('<ul></ul>');
                         data.forEach(function (item) {
                             var listItem = $('<li></li>').text(
                                 `TC Kimlik No: ${item.PersonId || 'Belirtilmemiş'}, İsim: ${item.Name || 'Belirtilmemiş'}, Soyisim: ${item.Surname || 'Belirtilmemiş'}, Doğum Yılı: ${item.YearOfBirth || 'Belirtilmemiş'}, Doğrulandı: ${item.IsVerified ? 'Evet' : 'Hayır'}`
                             );
-                            results.append(listItem);
+                            resultList.append(listItem);
                         });
+                        results.append(resultList);
                     },
                     error: function (xhr, status, error) {
                         alert('Bir hata oluştu: ' + error);
